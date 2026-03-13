@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Mini GTA - Yong Edition</title>
+    <style>
+        body { margin: 0; overflow: hidden; background: #222; font-family: sans-serif; touch-action: none; }
+        #map { position: absolute; width: 2000px; height: 2000px; background-color: #555; 
+               background-image: radial-gradient(#666 10%, transparent 10%); background-size: 50px 50px; }
+        #player { position: absolute; width: 40px; height: 25px; background: #e74c3c; border: 2px solid #000; 
+                  border-radius: 5px; z-index: 10; transition: transform 0.1s; }
+        .building { position: absolute; background: #333; border: 4px solid #111; color: #555; 
+                    display: flex; align-items: center; justify-content: center; font-weight: bold; }
+        #controls { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); 
+                    display: grid; grid-template-columns: repeat(3, 70px); gap: 10px; z-index: 100; }
+        .btn { width: 70px; height: 70px; background: rgba(255,255,255,0.3); border: 2px solid #fff; 
+               border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; color: white; }
+        #ui { position: fixed; top: 20px; left: 20px; color: white; background: rgba(0,0,0,0.5); padding: 10px; border-radius: 5px; }
+    </style>
+</head>
+<body>
+
+<div id="ui">📍 City Explorer | Use Buttons to Drive</div>
+
+<div id="map">
+    <div id="player"></div>
+    <div class="building" style="left: 200px; top: 200px; width: 200px; height: 300px;">MALL</div>
+    <div class="building" style="left: 600px; top: 100px; width: 400px; height: 200px;">PARKIR</div>
+    <div class="building" style="left: 300px; top: 700px; width: 300px; height: 300px;">MARKAS</div>
+    <div class="building" style="left: 800px; top: 600px; width: 200px; height: 500px;">BANK</div>
+</div>
+
+<div id="controls">
+    <div></div><div class="btn" id="up">⬆️</div><div></div>
+    <div class="btn" id="left">⬅️</div><div class="btn" id="down">⬇️</div><div class="btn" id="right">➡️</div>
+</div>
+
+<script>
+    const map = document.getElementById('map');
+    const player = document.getElementById('player');
+    let x = 100, y = 100, angle = 0, speed = 0;
+    let keys = { up: false, down: false, left: false, right: false };
+
+    // Input Setup
+    const setupBtn = (id, key) => {
+        const el = document.getElementById(id);
+        el.ontouchstart = (e) => { e.preventDefault(); keys[key] = true; };
+        el.ontouchend = (e) => { e.preventDefault(); keys[key] = false; };
+    };
+    setupBtn('up', 'up'); setupBtn('down', 'down'); setupBtn('left', 'left'); setupBtn('right', 'right');
+
+    function loop() {
+        // Logika Mengemudi
+        if (keys.up) speed = Math.min(speed + 0.2, 5);
+        else if (keys.down) speed = Math.max(speed - 0.2, -3);
+        else speed *= 0.95; // Gesekan (rem otomatis)
+
+        if (keys.left) angle -= 4;
+        if (keys.right) angle += 4;
+
+        // Hitung Gerakan Berdasarkan Sudut
+        x += Math.cos(angle * Math.PI / 180) * speed;
+        y += Math.sin(angle * Math.PI / 180) * speed;
+
+        // Render
+        player.style.left = x + 'px';
+        player.style.top = y + 'px';
+        player.style.transform = `rotate(${angle}deg)`;
+
+        // Kamera Mengikuti (Smooth Camera)
+        let camX = -x + window.innerWidth / 2;
+        let camY = -y + window.innerHeight / 2;
+        map.style.transform = `translate(${camX}px, ${camY}px)`;
+
+        requestAnimationFrame(loop);
+    }
+    loop();
+</script>
+</body>
+</html>
